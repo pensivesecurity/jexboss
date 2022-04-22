@@ -231,6 +231,10 @@ def check_vul(url):
                "Connection": "keep-alive",
                "User-Agent": get_random_user_agent()}
 
+    if gl_args.headers is not None:
+        new_header = gl_args.headers.split(': ')
+        headers[new_header[0]] = new_header[1]
+
     paths = {"jmx-console": "/jmx-console/HtmlAdaptor?action=inspectMBean&name=jboss.system:type=ServerInfo",
              "web-console": "/web-console/Invoker",
              "JMXInvokerServlet": "/invoker/JMXInvokerServlet",
@@ -718,6 +722,10 @@ def shell_http(url, shell_type):
                "Connection": "keep-alive",
                "User-Agent": get_random_user_agent()}
 
+    if gl_args.headers is not None:
+        new_header = gl_args.headers.split(': ')
+        headers[new_header[0]] = new_header[1]
+
     if gl_args.disable_check_updates:
         headers['no-check-updates'] = 'true'
 
@@ -1089,6 +1097,9 @@ if __name__ == "__main__":
     parser.add_argument('--cookies', help="Specify cookies for Struts 2 Exploit. Use this to test features that require authentication. "
                                          "Format: \"NAME1=VALUE1; NAME2=VALUE2\" (eg. --cookie \"JSESSIONID=24517D9075136F202DCE20E9C89D424D\""
                         , type=str, metavar='NAME=VALUE')
+    parser.add_argument('--headers', help="Specify headers to be added to all requests. Use this to test features that require authentication. "
+                                         "Format: \"HEADER: VALUE1\" (eg. --headers \"Authorization: Basic YWRtaW46YWRtaW4=\""
+                        , type=str, metavar='NAME: VALUE VALUE')
     #parser.add_argument('--retries', help="Retries when the connection timeouts (default 3)", default=3, type=int)
 
     # advanced parameters ---------------------------------------------------------------------------------------
@@ -1148,6 +1159,7 @@ if __name__ == "__main__":
         configure_http_pool()
         _updates.set_http_pool(gl_http_pool)
         _exploits.set_http_pool(gl_http_pool)
+        _exploits.set_args(gl_args)
         banner()
         if gl_args.proxy and not is_proxy_ok():
             exit(1)
@@ -1159,8 +1171,10 @@ if __name__ == '__testing__':
                "Connection": "keep-alive",
                "User-Agent": get_random_user_agent()}
 
+
     timeout = Timeout(connect=1.0, read=3.0)
     gl_http_pool = PoolManager(timeout=timeout, cert_reqs='CERT_NONE')
     _exploits.set_http_pool(gl_http_pool)
+    _exploits.set_args(gl_args)
 
 
